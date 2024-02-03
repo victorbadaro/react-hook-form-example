@@ -1,5 +1,7 @@
 import { Form } from '@/components/Form';
 
+import '@/styles/global.css';
+
 export function App() {
 	return (
 		<>
