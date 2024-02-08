@@ -1,10 +1,16 @@
+import { zodResolver } from '@hookform/resolvers/zod';
 import { SubmitHandler, useForm } from 'react-hook-form';
+import { z } from 'zod';
 
-interface FormFields {
-	name: string;
-	email: string;
-	password: string;
-}
+const schema = z.object({
+	name: z.string().refine(data => data.trim() !== '', {
+		message: 'This is a required field!'
+	}),
+	email: z.string().email(),
+	password: z.string().min(8).max(12)
+});
+
+type FormFields = z.infer<typeof schema>;
 
 export function Form() {
 	const {
@@ -13,7 +19,9 @@ export function Form() {
 		formState: {
 			errors
 		}
-	} = useForm<FormFields>();
+	} = useForm<FormFields>({
+		resolver: zodResolver(schema)
+	});
 	const onFormSubmit: SubmitHandler<FormFields> = (data) => {
 		console.log(data);
 	};
@@ -21,18 +29,16 @@ export function Form() {
 	return (
 		<form onSubmit={handleSubmit(onFormSubmit)}>
 			<div>
-				<input type="text" {...register('name', {
-					required: 'This field is required'
-				})} placeholder="Name" />
-				<span style={{ color: 'red' }}>{errors.name?.message}</span>
+				<input type="text" {...register('name')} placeholder="Name" />
+				{errors.name?.message && <span style={{ color: 'red' }}>{errors.name?.message}</span>}
 			</div>
 			<div>
 				<input type="email" {...register('email')} placeholder="Email" />
-				<span>{errors.email?.message}</span>
+				{errors.email?.message && <span style={{ color: 'red' }}>{errors.email?.message}</span>}
 			</div>
 			<div>
 				<input type="password" {...register('password')} placeholder="Password" />
-				<span>{errors.password?.message}</span>
+				{errors.password?.message && <span style={{ color: 'red' }}>{errors.password?.message}</span>}
 			</div>
 
 			<button type="submit">Save</button>
